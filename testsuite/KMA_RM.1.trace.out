@@ -1,0 +1,3 @@
+ERROR: got NULL from kma_malloc for alloc'able request: .
+./KMA_RM: Running in correctness mode
+Test: FAILED
