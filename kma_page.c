@@ -72,6 +72,7 @@ void initPages();
 
 /**************Implementation***********************************************/
 
+// Returns address to a kma_page_t
 kma_page_t*
 get_page()
 {

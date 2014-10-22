@@ -60,6 +60,12 @@
 void*
 kma_malloc(kma_size_t size)
 {
+ // USING FIRST FIT
+ // check if next_free_page is large enough to hold the new kma_page_t and size of the allocated memory
+ // if yes, store there
+ // if not, then find next free space
+ // go through entire memory and coalesce memory
+ 
   return NULL;
 }
 
