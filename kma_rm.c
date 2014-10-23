@@ -53,7 +53,7 @@
 kma_page_t * g_rmap;
 
 /************Function Prototypes******************************************/
-void check_requested_size(kma_size_t size);
+int check_requested_size(kma_size_t size);
 /************External Declaration*****************************************/
 
 /**************Implementation***********************************************/
@@ -84,7 +84,7 @@ kma_malloc(kma_size_t size)
     map = map ->ptr; // loop through the linked list till there's big enough space
   }
   
-  map->size = size;
+  map->size = map->size - size;
   map->ptr = map->ptr + size;
   g_rmap = map;
   return g_rmap->ptr + sizeof(kma_page_t*);
@@ -97,7 +97,7 @@ kma_free(void* ptr, kma_size_t size)
   
 }
 
-void check_requested_size(kma_size_t size)
+int check_requested_size(kma_size_t size)
 {
   if((size + sizeof(kma_page_t *)) > PAGESIZE)
   {
