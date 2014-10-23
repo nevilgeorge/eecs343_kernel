@@ -50,6 +50,7 @@
  */
 
 /************Global Variables*********************************************/
+kma_page_t * g_rmap;
 
 /************Function Prototypes******************************************/
 void check_requested_size(kma_size_t size);
@@ -65,28 +66,35 @@ kma_malloc(kma_size_t size)
  // if yes, store there
  // if not, then find next free space
  // go through entire memory and coalesce memory
-  kma_page_t * header;
+  kma_page_t * map;
   if (kma_page_stats.num_in_use == 0) {
-    header = get_page();
+    g_rmap = get_page();
+    *((kma_page_t**)g_rmap->ptr) = g_rmap;
     if(check_requested_size(size)) {
+      free_page(g_rmap);
       return NULL;
     }
+    map = g_rmap;
   } else {
     // Page already exists 
-    header = (kma_page_t * ) next_free_page;
-    *((kma_page_t**)header->ptr) = header;
-    
-
-    
-        
+    //map = (kma_page_t * ) next_free_page;
+    map = g_rmap;
   }
- 
+  while(map->size < size) {
+    map = map ->ptr; // loop through the linked list till there's big enough space
+  }
+  
+  map->size = size;
+  map->ptr = map->ptr + size;
+  g_rmap = map;
+  return g_rmap->ptr + sizeof(kma_page_t*);
 }
 
 void
 kma_free(void* ptr, kma_size_t size)
 {
-  ;
+  ptr = (kma_page_t *) ptr;
+  
 }
 
 void check_requested_size(kma_size_t size)
