@@ -52,7 +52,7 @@
 /************Global Variables*********************************************/
 
 /************Function Prototypes******************************************/
-
+void check_requested_size(kma_size_t size);
 /************External Declaration*****************************************/
 
 /**************Implementation***********************************************/
@@ -65,8 +65,20 @@ kma_malloc(kma_size_t size)
  // if yes, store there
  // if not, then find next free space
  // go through entire memory and coalesce memory
+  kma_page_t * header;
+  if (next_free_page == NULL) {
+    header = get_page();
+    if(check_requested_size(size)) {
+      return NULL;
+    }
+  } else {
+    // Page already exists 
+    header = (kma_page_t * ) next_free_page;
+
+    
+        
+  }
  
-  return NULL;
 }
 
 void
@@ -75,4 +87,13 @@ kma_free(void* ptr, kma_size_t size)
   ;
 }
 
+void check_requested_size(kma_size_t size)
+{
+  if((size + sizeof(kma_page_t *)) > PAGESIZE)
+  {
+    return 1;
+  } 
+}
+
 #endif // KMA_RM
+
