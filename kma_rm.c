@@ -67,7 +67,8 @@ kma_malloc(kma_size_t size)
  // if not, then find next free space
  // go through entire memory and coalesce memory
   kma_page_t * map;
-  if (kma_page_stats.num_in_use == 0) {
+  kma_page_stat_t * stats = page_stats();
+  if (stats->num_in_use == 0) {
     g_rmap = get_page();
     *((kma_page_t**)g_rmap->ptr) = g_rmap;
     if(check_requested_size(size)) {
@@ -81,13 +82,13 @@ kma_malloc(kma_size_t size)
     map = g_rmap;
   }
   while(map->size < size) {
-    map = map ->ptr; // loop through the linked list till there's big enough space
+    map = map -> ptr; // loop through the linked list till there's big enough space
+    
   }
   
-  map->size = map->size - size;
-  map->ptr = map->ptr + size;
-  g_rmap = map;
-  return g_rmap->ptr + sizeof(kma_page_t*);
+  g_rmap->ptr = map->ptr + size;
+  g_rmap->size = map->size - size;
+  return map->ptr + sizeof(kma_page_t*);
 }
 
 void
@@ -101,7 +102,7 @@ int check_requested_size(kma_size_t size)
 {
   if((size + sizeof(kma_page_t *)) > PAGESIZE)
   {
-    return 1;
+    return 0;
   } 
 }
 
