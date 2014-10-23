@@ -66,7 +66,7 @@ kma_malloc(kma_size_t size)
  // if not, then find next free space
  // go through entire memory and coalesce memory
   kma_page_t * header;
-  if (next_free_page == NULL) {
+  if (kma_page_stats.num_in_use == 0) {
     header = get_page();
     if(check_requested_size(size)) {
       return NULL;
@@ -74,6 +74,8 @@ kma_malloc(kma_size_t size)
   } else {
     // Page already exists 
     header = (kma_page_t * ) next_free_page;
+    *((kma_page_t**)header->ptr) = header;
+    
 
     
         
