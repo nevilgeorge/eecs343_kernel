@@ -50,9 +50,38 @@
  *  structures and arrays, line everything up in neat columns.
  */
 
+// struct used as the header of each buffer
+typedef struct
+{
+   void* nextblock;
+} buffer_header;
+
+// struct used as the header to a free list
+typedef struct
+{
+  int size; // size of buffers in this free list
+  int blocks_left; // number of blocks left to be allocated in the free list
+  buffer_header* start; // pointer to the first buffer in the linked list
+} free_list_head;
+
+typedef struct
+{
+  free_list_head buffer_32;
+  free_list_head buffer_64;
+  free_list_head buffer_128;
+  free_list_head buffer_256;
+  free_list_head buffer_512;
+  free_list_head buffer_1024;
+  free_list_head buffer_2048;
+  free_list_head buffer_4096;
+  free_list_head buffer_8192;
+} main_list;
 /************Global Variables*********************************************/
 
 /************Function Prototypes******************************************/
+
+void* kma_malloc(kma_size_t size);
+void kma_free(void* ptr, kma_size_t size);
 
 /************External Declaration*****************************************/
 
@@ -61,7 +90,10 @@
 void*
 kma_malloc(kma_size_t size)
 {
-  return NULL;
+  // cannot allocate a space larger than a half the pagesize since we are using power of two lists
+  if (size > PAGESIZE / 2) {
+	return NULL;
+  }
 }
 
 void
