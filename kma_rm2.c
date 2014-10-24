@@ -87,25 +87,25 @@ kma_malloc(kma_size_t size)
     fb->size = PAGESIZE-size; // Initialize the free block struct
     fb->nextblock = NULL;
     fb->prevblock = NULL;
-    memcpy(g_rmap, fb, sizeof(k_free_block)); // Copy the thing into the page 
-    return &g_rmap + sizeof(g_rmap->ptr); // Return the address of the allocated block
+    memcpy(g_rmap+size, fb, sizeof(k_free_block)); // Copy the thing into the page 
+    g_rmap->ptr = g_rmap+size;
+    return g_rmap->ptr; // Return the address of the allocated block
   } else {
     // Page already exists 
     k_free_block * fb = g_rmap->ptr;
+    k_free_block * ret;
     while(fb->size < size) {
       if(fb->nextblock == NULL) {
         // Request a new page & update everything else
       }
       fb = fb->nextblock;
     }
-    fb->size = fb->size - size;
+    fb->size = fb->size - size; // Update the size 
     fb->next = NULL;
     fb->prev = NULL;
-    memcpy(g_rmap, ); 
-  }
-  while(map->size < size) {
-    map = map -> ptr; // loop through the linked list till there's big enough space
-     
+    ret = fb; 
+    memcpy(fb+size, fb, sizeof(k_free_block));  // Move the struct to a new location
+    return ret+sizeof(k_free_block); 
   }
   
   g_rmap->ptr = map->ptr + size;
