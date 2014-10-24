@@ -49,8 +49,15 @@
  *  structures and arrays, line everything up in neat columns.
  */
 
+typedef struct
+{
+  int size;
+  void * nextbuffer;
+  void * prevbuffer;
+} k_free_block; 
+
 /************Global Variables*********************************************/
-kma_page_t * g_rmap;
+kma_page_t * g_rmap = NULL;
 
 /************Function Prototypes******************************************/
 int check_requested_size(kma_size_t size);
@@ -61,11 +68,16 @@ int check_requested_size(kma_size_t size);
 void*
 kma_malloc(kma_size_t size)
 {
+  if((size + sizeof(kma_page_t*)) > PAGESIZE)
+  {
+    return NULL;
+  }
  // USING FIRST FIT
  // check if next_free_page is large enough to hold the new kma_page_t and size of the allocated memory
  // if yes, store there
  // if not, then find next free space
  // go through entire memory and coalesce memory
+
   kma_page_t * map;
   kma_page_stat_t * stats = page_stats();
   if (stats->num_in_use == 0) {
