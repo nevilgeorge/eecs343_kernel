@@ -60,7 +60,7 @@ typedef struct
 typedef struct
 {
   int size; // size of buffers in this free list
-  int blocks_left; // number of blocks left to be allocated in the free list
+  int used; // number of blocks used
   buffer_header* start; // pointer to the first buffer in the linked list
 } free_list_head;
 
@@ -75,13 +75,16 @@ typedef struct
   free_list_head buffer_2048;
   free_list_head buffer_4096;
   free_list_head buffer_8192;
+  // main list of next page
+  main_list* next_main_list;
 } main_list;
 /************Global Variables*********************************************/
-
+kma_page_t* entry_point;
 /************Function Prototypes******************************************/
 
 void* kma_malloc(kma_size_t size);
 void kma_free(void* ptr, kma_size_t size);
+void initialize_page(kma_page_t* page_ptr, int size);
 
 /************External Declaration*****************************************/
 
@@ -90,16 +93,78 @@ void kma_free(void* ptr, kma_size_t size);
 void*
 kma_malloc(kma_size_t size)
 {
-  // cannot allocate a space larger than a half the pagesize since we are using power of two lists
-  if (size > PAGESIZE / 2) {
+  // cannot allocate a space larger than a page
+  if (size > PAGESIZE) {
 	return NULL;
   }
+
+  if (entry_point == NULL) {
+	// no page allocated yet, need to allocate first page
+	entry_point = getPage();
+	initialize_page(entry_point, size);
+  } 
 }
 
 void
 kma_free(void* ptr, kma_size_t size)
 {
   ;
+}
+
+void
+initialize_page(kma_page_t* page_ptr, int size)
+{
+  // initialize the page by splitting the page into powers of two
+  // however, we have to check whether the size needing allocation is greater than 
+  // 4096. If so, we should not split the page.
+  kma_page_t current_page = *page_ptr;
+  main_list* current_main_list = (main_list*)current_page->ptr;
+
+  if (size > PAGESIZE / 2) {
+	current_main_list->buffer_32 = NULL;
+	current_main_list->buffer_64 = NULL;
+	current_main_list->buffer_128 = NULL;
+	current_main_list->buffer_256 = NULL;
+	current_main_list->buffer_512 = NULL;
+	current_main_list->buffer_1024 = NULL;
+	current_main_list->buffer_2048 = NULL;
+	current_main_list->buffer_4096 = NULL;
+	
+	current_main_list->buffer_8192.size = 8192; 
+	current_main_list->buffer_8192.blocks_left = 1; 
+	current_main_list->buffer_8192.start = NULL; 
+  } else {
+  // if the size requested is less than half PAGESIZE, then we can split the page into a regular power of 2 list
+	
+	current_main_list->buffer_32.size = 32;
+	current_main_list->buffer_64.size = 64;
+	current_main_list->buffer_128.size = 128;
+	current_main_list->buffer_256.size = 256;
+	current_main_list->buffer_512.size = 512;
+	current_main_list->buffer_1024.size = 1024;
+	current_main_list->buffer_2048.size = 2048;
+	current_main_list->buffer_4096.size = 4096;
+
+	current_main_list->buffer_32.used = 0;
+	current_main_list->buffer_64.used = 0;
+	current_main_list->buffer_128.used = 0;
+	current_main_list->buffer_256.used = 0;
+	current_main_list->buffer_512.used = 0;
+	current_main_list->buffer_1024.used = 0;
+	current_main_list->buffer_2048.used = 0;
+	current_main_list->buffer_4096.used = 0;
+
+	current_main_list->buffer_32.start = NULL;
+	current_main_list->buffer_64.start = NULL;
+	current_main_list->buffer_128.start = NULL;
+	current_main_list->buffer_256.start = NULL;
+	current_main_list->buffer_512.start = NULL;
+	current_main_list->buffer_1024.start = NULL;
+	current_main_list->buffer_2048.start = NULL;
+	current_main_list->buffer_4096.start = NULL;
+
+	//split pages into powers of two
+  } 
 }
 
 #endif // KMA_P2FL
