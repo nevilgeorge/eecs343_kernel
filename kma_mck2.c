@@ -50,6 +50,26 @@
  *  structures and arrays, line everything up in neat columns.
  */
 
+// struct used as header of each buffer
+typedef struct 
+{
+  void * nextblock;
+} buffer_header;
+
+typedef struct page_node_struct
+{
+  kma_page_t* page;
+  struct page_node_struct* next; 
+} page_node;
+
+typedef struct
+{
+  int size; // size of buffers in this free list
+  int used; // number of blocks used
+  buffer_header* start; // pointer to the first buffer in the linked list
+  page_node* page_list;
+} free_list;
+
 /************Global Variables*********************************************/
 
 /************Function Prototypes******************************************/
