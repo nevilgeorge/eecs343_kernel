@@ -92,7 +92,7 @@ kma_page_t* entry_point;
 
 void* kma_malloc(kma_size_t size);
 void kma_free(void* ptr, kma_size_t size);
-void initialize_page(kma_page_t* page_ptr, int size);
+void initialize_page(kma_page_t* page_ptr);
 void* find_buffer_from_free_list(free_list* list);
 void allocate_buffers_to_list(free_list* list);
 /************External Declaration*****************************************/
@@ -110,7 +110,7 @@ kma_malloc(kma_size_t size)
   if (entry_point == NULL) {
 	// no page allocated yet, need to allocate first page
 	entry_point = get_page();
-	initialize_page(entry_point, size);
+	initialize_page(entry_point);
   }
 
   main_list* mainlist = (main_list*)entry_point->ptr;
@@ -248,7 +248,7 @@ kma_free(void* ptr, kma_size_t size)
 }
 
 void
-initialize_page(kma_page_t* page_ptr, int size)
+initialize_page(kma_page_t* page_ptr)
 {
   // initialize the page if it hasn't been initialized before.
   // This involves setting the main fields of each struct.

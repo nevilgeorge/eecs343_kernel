@@ -60,7 +60,10 @@
 void*
 kma_malloc(kma_size_t size)
 {
-  return NULL;
+  if (entry_point == NULL) {
+	entry_point = get_page();
+	initialize_page(entry_point);
+  }
 }
 
 void 
