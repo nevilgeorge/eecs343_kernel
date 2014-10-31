@@ -51,10 +51,7 @@
  */
 
 /*** pair_t *****/
-/* Used to keep the 
-   pair <base, size> 
-   resource map entries.
-   Has a linked list form */
+/* Used to keep the pair <base, size> resource map entries. Has a linked list form */
 typedef struct
 {
   int size;
@@ -62,14 +59,8 @@ typedef struct
   void * prevblock;
 } pair_t; 
 /****************/
-
 /*** page_info_t ***/
-/* Contains necessary 
-   information about 
-   the page. 
-   Makes life easier
-   when freeing & 
-   coalescing pages. */
+/* Contains necessary information about the page. Makes life easier when freeing & coalescing pages. */
 typedef struct
 {
   int buffer_count;
@@ -111,11 +102,13 @@ void* kma_malloc(kma_size_t size)
 
   if (g_rmap == NULL) { // CREATE NEW PAGE IF THERE IS NO PAGE YET
     g_rmap = get_page();
+    
     new_page(g_rmap);
+
   }
 
-  void * ret = find_space(size);
-  page_info_t * basepage = BASEADDR(ret);
+  void * ret = find_space(size); // Find the return space
+  page_info_t * basepage = BASEADDR(ret); 
   basepage->buffer_count++;
   return ret;
 }
@@ -149,6 +142,12 @@ void new_page(kma_page_t* page)
   add_pair((void*)(pageinfo->entry), (PAGESIZE-sizeof(page_info_t)));
 }
 
+/***************************************************************************
+ * Name: find_space
+ * Input: kma_size_t size
+ * Output: Pointer to the allocated space
+ * Purpose: Find appropriate space and return the pointer to the space
+ **************************************************************************/
 void* find_space(kma_size_t size)
 {
   page_info_t * pageinfo = (page_info_t*)(g_rmap->ptr);
@@ -176,6 +175,12 @@ void* find_space(kma_size_t size)
   return find_space(size); 
 }
 
+/***************************************************************************
+ * Name: add_pair 
+ * Input: pointer to base, kma_size_t size of block
+ * Output: None
+ * Purpose: Add a node to the linked list of the pair 
+ ***************************************************************************/
 void add_pair(void * base, kma_size_t size) 
 {
   page_info_t * pageinfo = (page_info_t*)(g_rmap->ptr);
@@ -210,6 +215,12 @@ void add_pair(void * base, kma_size_t size)
   }
 }
 
+/***************************************************************************
+ * Name: delete_pair
+ * Input: pointer to the base that wants to be freed
+ * Output: None
+ * Purpose: Get rid of something from the free pairs linked list
+ **************************************************************************/
 void delete_pair(void * base)
 {
   void * ptr = (pair_t*)base;
@@ -240,6 +251,12 @@ void delete_pair(void * base)
   }
 }
 
+/**************************************************************************
+ * Name: coalesce
+ * Input: pointer to a memory block
+ * Output: None
+ * Purpose: Coalesce any memory space and free any pages that doesn't need to be there
+ **************************************************************************/
 void coalesce(void * ptr)
 {
   // Coalesce appropriate free memory blocks
