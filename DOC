@@ -1,0 +1,14 @@
+#############################################
+############# Evaluation Report #############
+##### Nevil George ##### James Whang ########
+###### Lab 2: Kernel Memory Allocator #######
+#############################################
+
+
+A total of four algorithms were implemented: 
+  1. Resource Map 
+  2. Buddy System
+  3. Power-of-two Free List
+  4. McKusick-Karels
+
+
