@@ -11,4 +11,6 @@ A total of four algorithms were implemented:
   3. Power-of-two Free List
   4. McKusick-Karels
 
+Resource Map was implemented by using the First Fit policy, where the first memory that can fit the requested memory size was implemented. At the beginning of each allocated memory block there is a struct object that keeps track of the <base, limit> pair, which is in itself a linked list so that it can be searched in a linear time. 
 
+Its performance seems decent, but because the search for freeing up memory takes a linear time, subsequent calls to free may slow down this allocator by a lot. 
